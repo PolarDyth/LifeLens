@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Bundle Info -->
+    <key>CFBundleName</key>
+    <string>LifeLens</string>
+    <key>CFBundleDisplayName</key>
+    <string>LifeLens</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.lifelens.ios</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+
+    <!-- HealthKit Usage Descriptions (REQUIRED) -->
+    <key>NSHealthShareUsageDescription</key>
+    <string>LifeLens requires access to your health data to automatically track steps, heart rate, sleep, and workouts. Your data is stored privately on your home server.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>LifeLens requires permission to write health data to sync with your home server.</string>
+    <key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+    <string>LifeLens does not access your clinical health records.</string>
+
+    <!-- Location Usage Descriptions (Required for Task 8) -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>LifeLens uses your location to track places you visit. Your location data is stored privately on your home server.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>LifeLens requires background location access to automatically track places you visit throughout the day. Your location data is stored privately on your home server.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>LifeLens requires background location access to automatically track places you visit. Your location data is stored privately on your home server.</string>
+
+    <!-- CallKit Usage Description (Required for Task 9) -->
+    <key>NSCallKitUsageDescription</key>
+    <string>LifeLens requires CallKit access to detect incoming calls for communication tracking. Only metadata (caller ID, timestamp, duration) is logged, not call content.</string>
+
+    <!-- Background Modes -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>health-processing</string>
+        <string>location</string>
+        <string>processing</string>
+        <string>fetch</string>
+    </array>
+
+    <!-- App Info -->
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIImageName</key>
+        <string>LaunchScreen</string>
+    </dict>
+
+    <!-- Supported Interface Orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- Minimum iOS Version -->
+    <key>MinimumOSVersion</key>
+    <string>17.0</string>
+
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <!-- Allow HTTP for local development (should be removed in production) -->
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+        <!-- Allow arbitrary loads for self-signed certificates (user's home server) -->
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <!-- User can add their home server domain here -->
+            <key>localhost</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+</dict>
+</plist>

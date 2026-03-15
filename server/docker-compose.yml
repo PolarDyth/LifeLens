@@ -1,0 +1,38 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: lifelens-db
+    environment:
+      POSTGRES_USER: lifelens
+      POSTGRES_PASSWORD: lifelens
+      POSTGRES_DB: lifelens
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lifelens"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+      start_interval: 2s
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lifelens-server
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lifelens:lifelens@db:5432/lifelens
+      API_KEYS: test-key,dev-key
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  timescaledb_data:
