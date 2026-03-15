@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLens Connection Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0051D5;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 LifeLens Connection Test</h1>
+    <p>This page helps diagnose connection issues between your Mac and the Linux server.</p>
+
+    <div class="test-section">
+        <h2>Network Configuration</h2>
+        <p><strong>Server URL:</strong> <span id="serverUrl">http://192.168.1.87:8000</span></p>
+        <p><strong>API Key:</strong> test-key</p>
+        <p><strong>Device ID:</strong> demo-device-macbook</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Connection</h2>
+        <button onclick="runTests()">Run All Tests</button>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Browser Console</h2>
+        <p class="info">Open Developer Tools (Cmd+Option+I) and check the Console tab for detailed error messages.</p>
+    </div>
+
+    <script>
+        const API_URL = 'http://192.168.1.87:8000';
+        const API_KEY = 'test-key';
+
+        function addResult(title, status, message) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.style.marginTop = '20px';
+            div.innerHTML = `
+                <h3 class="${status}">${status === 'success' ? '✅' : status === 'error' ? '❌' : 'ℹ️'} ${title}</h3>
+                <pre>${JSON.stringify(message, null, 2)}</pre>
+            `;
+            results.appendChild(div);
+        }
+
+        async function test1_basicConnection() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                addResult('Test 1: Basic Connection', 'success', { status: response.status, data });
+            } catch (error) {
+                addResult('Test 1: Basic Connection', 'error', { error: error.message });
+            }
+        }
+
+        async function test2_corsPreflight() {
+            try {
+                const response = await fetch(`${API_URL}/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'X-API-Key'
+                    }
+                });
+                addResult('Test 2: CORS Preflight', 'success', {
+                    status: response.status,
+                    corsHeaders: {
+                        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                        'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+                        'access-control-allow-headers': response.headers.get('access-control-allow-headers')
+                    }
+                });
+            } catch (error) {
+                addResult('Test 2: CORS Preflight', 'error', { error: error.message });
+            }
+        }
+
+        async function test3_authenticatedRequest() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/query/health/today?device_id=demo-device-macbook`, {
+                    headers: {
+                        'X-API-Key': API_KEY
+                    }
+                });
+                const data = await response.json();
+                addResult('Test 3: Authenticated API Request', 'success', { status: response.status, data });
+            } catch (error) {
+                addResult('Test 3: Authenticated API Request', 'error', { error: error.message });
+            }
+        }
+
+        async function test4_networkInfo() {
+            const info = {
+                'Page URL': window.location.href,
+                'Page Origin': window.location.origin,
+                'Server URL': API_URL,
+                'User Agent': navigator.userAgent,
+                'Online': navigator.onLine
+            };
+            addResult('Test 4: Network Information', 'info', info);
+        }
+
+        async function runTests() {
+            document.getElementById('results').innerHTML = '<p>Running tests...</p>';
+            await new Promise(r => setTimeout(r, 100));
+
+            await test1_basicConnection();
+            await new Promise(r => setTimeout(r, 500));
+
+            await test2_corsPreflight();
+            await new Promise(r => setTimeout(r, 500));
+
+            await test3_authenticatedRequest();
+            await new Promise(r => setTimeout(r, 500));
+
+            await test4_networkInfo();
+
+            const results = document.getElementById('results');
+            const summary = document.createElement('div');
+            summary.style.marginTop = '20px';
+            summary.style.padding = '15px';
+            summary.style.background = '#e3f2fd';
+            summary.style.borderRadius = '8px';
+            summary.innerHTML = `
+                <h3>📋 Next Steps</h3>
+                <ul>
+                    <li>If all tests pass: Your Mac can connect to the server! Check your .env file in the dashboard directory.</li>
+                    <li>If Test 1 fails: Server is not reachable. Check if both devices are on the same WiFi network.</li>
+                    <li>If Test 2 fails: CORS issue. The server needs to be restarted with updated CORS settings.</li>
+                    <li>If Test 3 fails: API key issue. Verify VITE_API_KEY in your .env file.</li>
+                </ul>
+            `;
+            results.appendChild(summary);
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            console.log('LifeLens Connection Test Page Loaded');
+            console.log('Server URL:', API_URL);
+            console.log('Run tests manually by clicking the button, or check the console for errors.');
+        });
+    </script>
+</body>
+</html>

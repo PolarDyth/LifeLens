@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://lifelens:lifelens@db:5432/lifelens
       API_KEYS: test-key,dev-key
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost:8000,http://192.168.1.87:5173,http://192.168.1.87:5174,http://192.168.1.218:5173
     ports:
       - "8000:8000"
     depends_on:
